@@ -55,7 +55,7 @@ class Expression {
                  if(solve(expression.leftChild) == solve(expression.rightChild)) return 1;
                  else return 0;
             default:
-                return java.lang.Integer.valueOf(expression.node);
+                return Long.valueOf(expression.node);
         }
 
     }

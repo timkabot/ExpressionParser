@@ -1,19 +1,21 @@
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Program {
-    public static void main(String[] args) throws FileNotFoundException {
-        File inputFile = new File("expression.txt");
+    public static void main(String[] args) throws IOException {
+        File inputFile = new File("in.txt");
         Scanner sc = new Scanner(inputFile);
-        String input ;
+        String input;
+        StringBuilder answer = new StringBuilder();
+        Writer writer = new Writer();
         while( sc.hasNextLine() ){
             input = sc.nextLine();
             input = input.replaceAll(" ", "");
             Parser myParser = new Parser();
             Expression tree = myParser.parse(input);
-            System.out.println(tree.calculate());
+            answer.append(tree.calculate() + "\n");
         }
-
+        writer.write(answer.toString());
     }
 }

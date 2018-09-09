@@ -1,6 +1,4 @@
-/**
- * Created by Timkabor on 10/10/2017.
- */
+
 class Factor extends Expression {
 
     enum Opcode {
