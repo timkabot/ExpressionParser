@@ -35,8 +35,8 @@ class Expression {
         this.rightChild = rightChild;
     }
 
-    void calculate() {
-        System.out.println(solve(this));
+    long calculate() {
+        return solve(this);
     }
 
     private long solve(Expression expression) {
@@ -51,6 +51,9 @@ class Expression {
                 return solve(expression.leftChild) - solve(expression.rightChild);
             case "*":
                 return solve(expression.leftChild) * solve(expression.rightChild);
+            case "=":
+                 if(solve(expression.leftChild) == solve(expression.rightChild)) return 1;
+                 else return 0;
             default:
                 return java.lang.Integer.valueOf(expression.node);
         }

@@ -4,33 +4,43 @@ class Parser {
     }
 
     Expression parse(String input) {
-        return parseRelation(input);
+       return parseRelation(input);
     }
 
-    private Expression parseRelation(String input) {
+    public Expression parseRelation(String input) {
+        //System.out.println(input + " Relation");
         Expression answer = new Expression();
         Relation.Opcode op = findRelOp(input);
         if (op == Relation.Opcode.none)
             answer = parseTerm(input);
         else {
             answer.setNode(op.getOp());
-
-            answer.setLeftChild(parseRelation(input.substring(0, op.getLeft_border())));
-            answer.setRightChild(parseRelation(input.substring(op.getRight_border())));
+            int r = op.getRight_border(), l = op.getLeft_border();
+            answer.setLeftChild(parseRelation(input.substring(0, l)));
+            answer.setRightChild(parseRelation(input.substring(r)));
         }
         return answer;
     }
 
-    private Relation.Opcode findRelOp(String input) {
+    public Relation.Opcode findRelOp(String input) {
+
         Relation.Opcode answer = Relation.Opcode.none;
-        int len = input.length();
-        for (int i = 0; i < len - 1; i++) {
+        int len = input.length(), counter = 0;
+        for (int i = 0; i < len ; i++) {
             char ch = input.charAt(i);
 
-            if (ch == '(')
-                while (input.charAt(i) != ')')
+            //pass parenthesis
+            if(ch == '(') {
+                counter = 1;
+                i++;
+                while(counter>0)
+                {
+                    if(input.charAt(i) ==')') counter--;
+                    else if(input.charAt(i) == '(') counter++;
                     i++;
-
+                }
+            }
+            if(i>=0 && i<len) ch = input.charAt(i);
             if (ch == '<') {
                 answer = Relation.Opcode.less;
                 answer.setLeft_border(i);
@@ -55,27 +65,39 @@ class Parser {
         return answer;
     }
 
-    private Expression parseTerm(String input) {
+    public Expression parseTerm(String input) {
+        //System.out.println(input + " Term");
+
         Expression answer = new Expression();
         Term.Opcode op = findTermOp(input);
         if (op == Term.Opcode.none)
             answer = parseFactor(input);
         else {
             answer.setNode(op.getOp());
+            int r = op.getRight_border(), l = op.getLeft_border();
+            answer.setLeftChild(parseTerm(input.substring(0,l)));
+            answer.setRightChild(parseTerm(input.substring(r)));
 
-            answer.setLeftChild(parseTerm(input.substring(0, op.getLeft_border())));
-            answer.setRightChild(parseTerm(input.substring(op.getRight_border())));
         }
         return answer;
     }
 
-    private Term.Opcode findTermOp(String input) {
+    public Term.Opcode findTermOp(String input) {
         Term.Opcode answer = Term.Opcode.none;
-        for (int i = 0; i < input.length(); i++) {
+        int len = input.length(), counter =0;
+        for (int i = 0; i < len; i++) {
             char ch = input.charAt(i);
-            if (ch == '(')
-                while (input.charAt(i) != ')')
+
+            if(ch == '(') {
+                counter = 1;
+                while(counter>0)
+                {
                     i++;
+                    if(input.charAt(i) ==')') counter--;
+                    if(input.charAt(i) == '(') counter++;
+                }
+            }
+            if(i>=0 && i<len) ch = input.charAt(i);
 
             switch (ch) {
                 case '+':
@@ -96,28 +118,39 @@ class Parser {
         return answer;
     }
 
-    private Expression parseFactor(String input) {
+    public Expression parseFactor(String input) {
+        //System.out.println(input + " Factor");
+
         Expression result = new Expression();
         Factor.Opcode op = findFacOp(input);
         if (op == Factor.Opcode.none)
             result = parsePrimary(input);
         else {
             result.setNode(op.getOp());
-            result.setLeftChild(parseFactor(input.substring(0, op.getLeft_border())));
-            result.setRightChild(parseFactor(input.substring(op.getRight_border())));
+            int r = op.getRight_border(), l = op.getLeft_border();
+            result.setLeftChild(parseFactor(input.substring(0, l)));
+            result.setRightChild(parseFactor(input.substring(r)));
         }
         return result;
     }
 
-    private Factor.Opcode findFacOp(String input) {
+    public Factor.Opcode findFacOp(String input) {
         Factor.Opcode answer = Factor.Opcode.none;
-        int len = input.length();
+        int len = input.length(), counter = 0;
         for (int i = 0; i < len; i++) {
+
             char ch = input.charAt(i);
 
-            if (ch == '(')
-                while (input.charAt(i) != ')')
+            if(ch == '(') {
+                counter = 1;
+                while(counter>0)
+                {
                     i++;
+                    if(input.charAt(i) ==')') counter--;
+                    if(input.charAt(i) == '(') counter++;
+                }
+            }
+            if(i>=0 && i<len) ch = input.charAt(i);
 
             switch (ch) {
                 case '*':
@@ -130,11 +163,11 @@ class Parser {
         return answer;
     }
 
-    private boolean isInteger(String s) {
+    public boolean isInteger(String s) {
         return isInteger(s, 10);
     }
 
-    private boolean isInteger(String s, int radix) {
+    public boolean isInteger(String s, int radix) {
         if (s.isEmpty()) return false;
         for (int i = 0; i < s.length(); i++) {
             if (i == 0 && s.charAt(i) == '-') {
@@ -146,18 +179,23 @@ class Parser {
         return true;
     }
 
-    private Expression parsePrimary(String input) {
+    public Expression parsePrimary(String input) {
+        //System.out.println(input + " Primary");
+
         if (isInteger(input)) return parseInteger(input);
         return parseParenthesized(input);
     }
 
-    private Expression parseInteger(String input) {
+    public Expression parseInteger(String input) {
+        //System.out.println(input + " Integer");
+
         return new Expression(input, null, null);
     }
 
-    private Expression parseParenthesized(String input) {
-        Parenthesized parenthesized = new Parenthesized(input);
-        return parse(parenthesized.getInput());
+    public Expression parseParenthesized(String input) {
+        //System.out.println(input + " Parenthesized");
+
+        return parse(input.substring(1, input.length() - 1));
     }
 
 }
